@@ -37,6 +37,15 @@ A website that generates authentic MCAT CARS (Critical Analysis and Reasoning Sk
 - Store passage metadata (source URL, date scraped, topic category)
 - Passages should be de-duplicated before storage
 
+## User Environment
+
+**The user works exclusively on an iPad.**
+- No local terminal, no local Python/Node server
+- All backend services must be deployed to the cloud (not localhost)
+- Frontend must be hosted (GitHub Pages, Netlify, etc.) — not opened as a local file
+- Recommended deployment: **Railway** (backend) + **GitHub Pages** (frontend)
+- For development/editing: user uses Claude Code via browser
+
 ## Branch
 
 Active development branch: `claude/mcat-passage-generator-WgU62`
