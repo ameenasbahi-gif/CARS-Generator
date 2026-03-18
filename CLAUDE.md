@@ -43,8 +43,13 @@ A website that generates authentic MCAT CARS (Critical Analysis and Reasoning Sk
 - No local terminal, no local Python/Node server
 - All backend services must be deployed to the cloud (not localhost)
 - Frontend must be hosted (GitHub Pages, Netlify, etc.) — not opened as a local file
-- Recommended deployment: **Railway** (backend) + **GitHub Pages** (frontend)
 - For development/editing: user uses Claude Code via browser
+
+**Everything must be free** unless the user explicitly says otherwise and agrees to a cost.
+- No paid services, no paid tiers, no credit card requirements
+- Preferred free stack: **Render** (backend, free tier) + **GitHub Pages** (frontend)
+- Railway removed from recommendations — free tier discontinued in 2024
+- Other free options: Fly.io (free tier), Supabase (free DB), Cloudflare Pages (free frontend)
 
 ## Branch
 
