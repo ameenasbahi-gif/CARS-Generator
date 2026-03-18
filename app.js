@@ -10,7 +10,12 @@ const passages = [
     category: "humanities",
     categoryLabel: "Humanities",
     title: "The Paradox of Artistic Interpretation",
-    source: "Philosophy of Art — Sample Passage",
+    source: "Humanities — Philosophy of Art",
+    citation: {
+      note: "Original MCAT CARS-style practice passage. Topics: philosophy of art, intentionalism (E.D. Hirsch), reader-response theory (Roland Barthes). Consistent with AAMC CARS humanities passages.",
+      url: "https://students-residents.aamc.org/prepare-mcat-exam/free-planning-and-study-resources",
+      urlLabel: "AAMC Free Official Practice Resources ↗"
+    },
     text: `
       <p>The relationship between an artwork and its meaning has long been a source of philosophical contention. On one side stand the intentionalists, who argue that the meaning of any work is fixed by what its creator intended to communicate. On the other stand theorists who insist that once a work leaves its creator's hands, it enters a social life entirely independent of its origins. Neither camp has succeeded in extinguishing the other, partly because each captures something that the other ignores.</p>
       <p>The intentionalist position has genuine appeal. When we read a poem, we naturally wonder what the poet was trying to express. Context — biographical, historical, cultural — feels relevant in a way that is hard to dismiss. To know that Keats wrote "Ode to a Nightingale" while contemplating his own mortality is to understand the poem differently than if we knew nothing about him. This knowledge does not seem like a distraction; it seems like information we need.</p>
@@ -87,7 +92,12 @@ const passages = [
     category: "social",
     categoryLabel: "Social Sciences",
     title: "Trust, Reciprocity, and the Foundations of Social Capital",
-    source: "Sociology & Economics — Sample Passage",
+    source: "Social Sciences — Sociology & Economics",
+    citation: {
+      note: "Original MCAT CARS-style practice passage. Topics: social capital theory (Robert Putnam, James Coleman), thin vs. thick trust, institutional foundations of cooperation. Consistent with AAMC CARS social sciences passages.",
+      url: "https://students-residents.aamc.org/prepare-mcat-exam/free-planning-and-study-resources",
+      urlLabel: "AAMC Free Official Practice Resources ↗"
+    },
     text: `
       <p>Social capital — the networks of relationships and norms of reciprocity that enable people to act collectively — has attracted increasing attention from economists and sociologists alike. The concept suggests that societies are not merely aggregations of self-interested individuals but communities held together by webs of trust and obligation. How such trust is built, maintained, and depleted has enormous practical consequences for everything from economic development to democratic participation.</p>
       <p>One influential line of research distinguishes between two types of trust. Thick trust is the deep, personal confidence we place in family members, close friends, and longstanding associates — people whose character and reliability we know firsthand. Thin trust, by contrast, is the generalized expectation that strangers will behave honestly and predictably simply because they are members of the same society. It is thin trust, theorists argue, that is essential for modern economic life, since most market transactions occur between people who will never meet again.</p>
@@ -154,7 +164,12 @@ const passages = [
     category: "humanities",
     categoryLabel: "Humanities",
     title: "Memory, Narrative, and the Self",
-    source: "Philosophy & Psychology — Sample Passage",
+    source: "Humanities — Philosophy & Cognitive Psychology",
+    citation: {
+      note: "Original MCAT CARS-style practice passage. Topics: constructive memory (Frederic Bartlett, Elizabeth Loftus), narrative identity theory (Paul Ricoeur, Alasdair MacIntyre). Consistent with AAMC CARS humanities passages.",
+      url: "https://students-residents.aamc.org/prepare-mcat-exam/free-planning-and-study-resources",
+      urlLabel: "AAMC Free Official Practice Resources ↗"
+    },
     text: `
       <p>We tend to think of memory as a faculty that records the past the way a camera records an image — passively, accurately, and more or less permanently. This view has been thoroughly dismantled by decades of psychological research, yet it persists in everyday life and in the courtroom, where eyewitness testimony continues to carry outsized weight. Understanding why the recording model of memory is wrong, and what the alternative implies for our sense of self, is one of the most unsettling challenges that cognitive science poses to ordinary human self-understanding.</p>
       <p>Memory, psychologists now agree, is better understood as reconstruction than as reproduction. Each time we recall an event, we do not simply retrieve a stored representation; we actively rebuild it using available fragments, current knowledge, and the implicit demands of the present context. This means that memory is inevitably shaped by what has happened since the original event, by social pressures on how the event should be recalled, and by the sheer narrative coherence we require of our pasts. We remember, in short, not merely what happened but what makes sense of who we are now.</p>
@@ -231,7 +246,12 @@ const passages = [
     category: "natural",
     categoryLabel: "Natural Sciences",
     title: "The Replication Crisis and the Philosophy of Scientific Evidence",
-    source: "History & Philosophy of Science — Sample Passage",
+    source: "Natural Sciences — History & Philosophy of Science",
+    citation: {
+      note: "Original MCAT CARS-style practice passage. Topics: the replication crisis in social psychology, p-hacking, publication bias, pre-registration. Consistent with AAMC CARS natural sciences passages.",
+      url: "https://students-residents.aamc.org/prepare-mcat-exam/free-planning-and-study-resources",
+      urlLabel: "AAMC Free Official Practice Resources ↗"
+    },
     text: `
       <p>Over the past fifteen years, a wave of failed replication attempts has shaken several branches of science, most visibly social psychology. Researchers attempting to reproduce findings that had been widely cited and taught discovered that a substantial proportion of published results could not be reliably reproduced. The episode, quickly labeled the "replication crisis," prompted soul-searching about the methods, incentive structures, and epistemic standards that govern scientific practice.</p>
       <p>One response to the crisis has been methodological: stricter standards for statistical significance, mandatory pre-registration of hypotheses, larger sample sizes, and open sharing of raw data. These reforms target what critics describe as "questionable research practices" — not outright fraud, but a range of flexible analytical choices that, when made post hoc and in the direction of desired results, inflate the apparent strength of evidence. Reformers argue that adopting more transparent and stringent procedures will gradually cleanse the literature of unreliable findings.</p>
@@ -302,18 +322,19 @@ let submitted        = false;
 
 // ── DOM REFERENCES ───────────────────────────────────────────
 
-const landing         = document.getElementById("landing");
-const passageSection  = document.getElementById("passageSection");
-const generateBtn     = document.getElementById("generateBtn");
-const backBtn         = document.getElementById("backBtn");
-const categoryPills   = document.getElementById("categoryPills");
-const categoryBadge   = document.getElementById("categoryBadge");
-const passageSource   = document.getElementById("passageSource");
-const passageTitle    = document.getElementById("passageTitle");
-const passageText     = document.getElementById("passageText");
-const questionsList   = document.getElementById("questionsList");
-const submitBtn       = document.getElementById("submitBtn");
-const scoreDisplay    = document.getElementById("scoreDisplay");
+const landing           = document.getElementById("landing");
+const passageSection    = document.getElementById("passageSection");
+const generateBtn       = document.getElementById("generateBtn");
+const backBtn           = document.getElementById("backBtn");
+const categoryPills     = document.getElementById("categoryPills");
+const categoryBadge     = document.getElementById("categoryBadge");
+const passageSource     = document.getElementById("passageSource");
+const passageTitle      = document.getElementById("passageTitle");
+const passageText       = document.getElementById("passageText");
+const passageCitation   = document.getElementById("passageCitation");
+const questionsList     = document.getElementById("questionsList");
+const submitBtn         = document.getElementById("submitBtn");
+const scoreDisplay      = document.getElementById("scoreDisplay");
 
 // ── EVENT LISTENERS ──────────────────────────────────────────
 
@@ -359,6 +380,20 @@ function renderPassage(p) {
   passageSource.textContent  = p.source;
   passageTitle.textContent   = p.title;
   passageText.innerHTML      = p.text;
+
+  // Render citation block
+  if (p.citation) {
+    passageCitation.innerHTML = `
+      <span class="citation-label">Source</span>
+      <span class="citation-note">${p.citation.note}</span>
+      <a class="citation-link" href="${p.citation.url}" target="_blank" rel="noopener">
+        ${p.citation.urlLabel}
+      </a>
+    `;
+    passageCitation.classList.remove("hidden");
+  } else {
+    passageCitation.classList.add("hidden");
+  }
 
   // Render questions
   questionsList.innerHTML = "";
