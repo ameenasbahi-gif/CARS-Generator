@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MCAT App – Passage Layout Options</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    html, body { height: 100%; }
+
+    :root {
+      --bg-primary: #f5f5f7;
+      --bg-secondary: #ffffff;
+      --bg-tertiary: #e5e5e7;
+      --border: #d1d1d6;
+      --text-primary: #1d1d1f;
+      --text-secondary: #86868b;
+      --text-tertiary: #aeaeb2;
+      --accent: #0071e3;
+      --accent-hover: #0077ed;
+      --success: #34c759;
+      --selected-bg: #e8f4fd;
+      --selected-border: #0071e3;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg-primary: #1d1d1f;
+        --bg-secondary: #2d2d2f;
+        --bg-tertiary: #3d3d3f;
+        --border: #424245;
+        --text-primary: #f5f5f7;
+        --text-secondary: #86868b;
+        --text-tertiary: #636366;
+        --accent: #0a84ff;
+        --accent-hover: #409cff;
+        --selected-bg: rgba(10, 132, 255, 0.15);
+        --selected-border: #0a84ff;
+      }
+    }
+
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      display: flex;
+      flex-direction: column;
+      min-height: 100%;
+    }
+
+    .header {
+      background: var(--bg-secondary);
+      padding: 0.75rem 1.5rem;
+      border-bottom: 1px solid var(--border);
+      flex-shrink: 0;
+    }
+    .header h1 { font-size: 0.9rem; font-weight: 500; color: var(--text-secondary); }
+
+    .main { flex: 1; overflow-y: auto; }
+    #claude-content { padding: 2rem; }
+
+    .indicator-bar {
+      background: var(--bg-secondary);
+      border-top: 1px solid var(--border);
+      padding: 0.6rem 1.5rem;
+      text-align: center;
+      flex-shrink: 0;
+    }
+    .indicator-bar span { font-size: 0.8rem; color: var(--text-secondary); }
+    .indicator-bar .selected-text { color: var(--accent); font-weight: 600; }
+
+    h2 { font-size: 1.4rem; font-weight: 600; margin-bottom: 0.4rem; }
+    .subtitle { color: var(--text-secondary); margin-bottom: 1.5rem; font-size: 0.95rem; }
+
+    .options { display: flex; flex-direction: column; gap: 0.75rem; }
+    .option {
+      background: var(--bg-secondary);
+      border: 2px solid var(--border);
+      border-radius: 12px;
+      padding: 1rem 1.25rem;
+      cursor: pointer;
+      transition: all 0.15s ease;
+      display: flex;
+      align-items: flex-start;
+      gap: 1rem;
+    }
+    .option:hover { border-color: var(--accent); }
+    .option.selected { background: var(--selected-bg); border-color: var(--selected-border); }
+    .option .letter {
+      background: var(--bg-tertiary);
+      color: var(--text-secondary);
+      width: 1.75rem; height: 1.75rem;
+      border-radius: 6px;
+      display: flex; align-items: center; justify-content: center;
+      font-weight: 600; font-size: 0.85rem; flex-shrink: 0;
+    }
+    .option.selected .letter { background: var(--accent); color: white; }
+    .option .content { flex: 1; }
+    .option .content h3 { font-size: 0.95rem; margin-bottom: 0.2rem; }
+    .option .content p { color: var(--text-secondary); font-size: 0.85rem; margin-bottom: 0; }
+
+    .mockup {
+      background: var(--bg-secondary);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      overflow: hidden;
+      margin-top: 12px;
+    }
+    .mockup-header {
+      background: var(--bg-tertiary);
+      padding: 0.4rem 0.85rem;
+      font-size: 0.72rem;
+      color: var(--text-secondary);
+      border-bottom: 1px solid var(--border);
+    }
+    .mockup-body { padding: 10px; }
+  </style>
+</head>
+<body>
+
+  <div class="header">
+    <h1>MCAT App — Brainstorming</h1>
+  </div>
+
+  <div class="main">
+    <div id="claude-content">
+
+      <h2>Passage Page Layout</h2>
+      <p class="subtitle">How should the passage and questions be arranged?</p>
+
+      <div class="options">
+
+        <div class="option" data-choice="a" onclick="toggleSelect(this)">
+          <div class="letter">A</div>
+          <div class="content">
+            <h3>Side-by-Side (Split Panel)</h3>
+            <p>Passage on the left, questions on the right. Both scrollable independently. Mimics reading a document while answering.</p>
+            <div class="mockup">
+              <div class="mockup-header">Preview</div>
+              <div class="mockup-body" style="display:flex;gap:8px;min-height:120px;">
+                <div style="flex:1;background:#1a2a3a;border-radius:4px;padding:10px;font-size:11px;color:#aaa;overflow:hidden;">
+                  <div style="font-weight:bold;color:#ccc;margin-bottom:6px;">Passage</div>
+                  <div style="line-height:1.6;">Lorem ipsum passage text here. Multiple paragraphs of dense academic writing on humanities topics...</div>
+                </div>
+                <div style="flex:1;background:#1a2a3a;border-radius:4px;padding:10px;font-size:11px;color:#aaa;">
+                  <div style="font-weight:bold;color:#ccc;margin-bottom:6px;">Questions</div>
+                  <div style="background:#0d1f30;border-radius:4px;padding:6px;margin-bottom:6px;">Q1. The author's main argument is...</div>
+                  <div style="background:#0d1f30;border-radius:4px;padding:6px;margin-bottom:6px;">Q2. Which of the following best...</div>
+                  <div style="background:#0d1f30;border-radius:4px;padding:6px;">Q3. The tone of the passage...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="option" data-choice="b" onclick="toggleSelect(this)">
+          <div class="letter">B</div>
+          <div class="content">
+            <h3>Stacked (Passage then Questions)</h3>
+            <p>Full-width passage at the top, questions below. Simpler, more mobile-friendly. Read the passage, then scroll down to answer.</p>
+            <div class="mockup">
+              <div class="mockup-header">Preview</div>
+              <div class="mockup-body" style="min-height:120px;">
+                <div style="background:#1a2a3a;border-radius:4px;padding:10px;font-size:11px;color:#aaa;margin-bottom:8px;">
+                  <div style="font-weight:bold;color:#ccc;margin-bottom:6px;">Passage</div>
+                  <div style="line-height:1.6;">Lorem ipsum passage text here. Full width, easy to read across the entire screen...</div>
+                </div>
+                <div style="display:flex;gap:6px;flex-wrap:wrap;">
+                  <div style="background:#1a2a3a;border-radius:4px;padding:6px 10px;font-size:11px;color:#aaa;flex:1;min-width:120px;">Q1. The author's main argument...</div>
+                  <div style="background:#1a2a3a;border-radius:4px;padding:6px 10px;font-size:11px;color:#aaa;flex:1;min-width:120px;">Q2. Which of the following...</div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+    </div>
+  </div>
+
+  <div class="indicator-bar">
+    <span id="indicator-text">Tap an option above to select it</span>
+  </div>
+
+  <script>
+    function toggleSelect(el) {
+      const wasSelected = el.classList.contains('selected');
+      document.querySelectorAll('.option').forEach(o => o.classList.remove('selected'));
+      if (!wasSelected) {
+        el.classList.add('selected');
+        const choice = el.dataset.choice.toUpperCase();
+        const title = el.querySelector('h3').textContent;
+        document.getElementById('indicator-text').innerHTML =
+          'Selected: <span class="selected-text">' + choice + ' — ' + title + '</span>';
+      } else {
+        document.getElementById('indicator-text').textContent = 'Tap an option above to select it';
+      }
+    }
+  </script>
+
+</body>
+</html>
