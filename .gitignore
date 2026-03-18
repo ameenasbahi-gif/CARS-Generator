@@ -1,0 +1,15 @@
+# Environment variables — never commit these
+backend/.env
+.env
+
+# Python
+__pycache__/
+*.py[cod]
+*.pyo
+.pytest_cache/
+
+# SQLite (old, replaced by Supabase)
+*.db
+
+# Local start script
+start.sh

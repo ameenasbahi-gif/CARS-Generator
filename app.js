@@ -3,7 +3,9 @@
    Fetches passages from FastAPI backend (localhost:8000)
    ============================================================ */
 
-const API_BASE = "http://localhost:8000";
+// !! UPDATE THIS after deploying to Render !!
+// e.g. "https://mcat-cars-api.onrender.com"
+const API_BASE = "https://YOUR-APP-NAME.onrender.com";
 
 // ── STATE ────────────────────────────────────────────────────
 

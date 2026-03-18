@@ -4,6 +4,9 @@ Jack Westin CARS Passage Scraper
 Uses Playwright (headless Chromium) because Jack Westin is a React app
 that blocks plain HTTP requests.
 
+Runs in GitHub Actions (where Playwright is installed).
+NOT used on Render (too heavy for free tier).
+
 Passage list:  https://jackwestin.com/daily/mcat-practice-passages/cars-practice-passages/
 Each passage:  https://jackwestin.com/resources/cars-passage/<slug>
 
@@ -14,7 +17,12 @@ import asyncio
 import re
 import logging
 from typing import Optional
-from playwright.async_api import async_playwright, Page, TimeoutError as PWTimeout
+
+try:
+    from playwright.async_api import async_playwright, Page, TimeoutError as PWTimeout
+    PLAYWRIGHT_AVAILABLE = True
+except ImportError:
+    PLAYWRIGHT_AVAILABLE = False
 
 from database import upsert_passage
 
@@ -118,6 +126,10 @@ class JackWestinScraper:
 
     async def scrape(self) -> int:
         """Scrape Jack Westin CARS passages. Returns number of passages saved."""
+        if not PLAYWRIGHT_AVAILABLE:
+            log.warning("Playwright not installed — skipping Jack Westin scraper.")
+            return 0
+
         saved = 0
         async with async_playwright() as p:
             browser = await p.chromium.launch(headless=True)
