@@ -547,6 +547,36 @@ h1 {
   border: 1px solid rgba(0, 180, 200, 0.3);
 }
 
+/* ── EXPLANATION BLOCK ────────────────────────────────────── */
+
+.explanation {
+  margin-top: 0.75rem;
+  padding: 0.85rem 1rem;
+  background: rgba(0, 180, 200, 0.07);
+  border-left: 3px solid var(--teal-bright);
+  border-radius: 0 10px 10px 0;
+  font-size: 0.87rem;
+  line-height: 1.6;
+  color: var(--text-mid);
+}
+
+.explanation-label {
+  display: inline-block;
+  font-size: 0.68rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--teal-bright);
+  margin-right: 0.5rem;
+}
+
+/* Loading state on generate button */
+.btn-generate:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+  transform: none;
+}
+
 /* ── RESPONSIVE ───────────────────────────────────────────── */
 
 @media (max-width: 600px) {
