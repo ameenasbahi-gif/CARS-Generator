@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>MCAT CARS Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=Inter:wght@400;500;600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- LANDING SECTION -->
+  <section id="landing">
+    <div class="landing-inner">
+      <div class="logo-mark">CARS</div>
+      <h1>MCAT CARS Practice</h1>
+      <p class="tagline">
+        Sharpen your Critical Analysis &amp; Reasoning Skills with authentic
+        passage-based practice.
+      </p>
+
+      <div class="category-row">
+        <span class="category-label">Category:</span>
+        <div class="category-pills" id="categoryPills">
+          <button class="pill active" data-category="all">All</button>
+          <button class="pill" data-category="humanities">Humanities</button>
+          <button class="pill" data-category="social">Social Sciences</button>
+          <button class="pill" data-category="natural">Natural Sciences</button>
+        </div>
+      </div>
+
+      <button class="btn-generate" id="generateBtn">
+        Generate CARS Passage
+      </button>
+
+      <p class="hint">Each passage comes with 5–7 multiple choice questions.</p>
+    </div>
+  </section>
+
+  <!-- PASSAGE SECTION (hidden until generated) -->
+  <section id="passageSection" class="hidden">
+
+    <header class="passage-header">
+      <button class="btn-back" id="backBtn">&#8592; New Passage</button>
+      <div class="passage-meta">
+        <span class="badge" id="categoryBadge"></span>
+        <span class="source" id="passageSource"></span>
+      </div>
+    </header>
+
+    <div class="passage-container">
+      <div class="passage-card">
+        <h2 class="passage-title" id="passageTitle"></h2>
+        <div class="passage-text" id="passageText"></div>
+      </div>
+
+      <div class="questions-section">
+        <h3 class="questions-heading">Questions</h3>
+        <div id="questionsList"></div>
+        <div class="submit-row">
+          <button class="btn-submit" id="submitBtn">Submit Answers</button>
+          <div class="score-display hidden" id="scoreDisplay"></div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <script src="app.js"></script>
+</body>
+</html>
