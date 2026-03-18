@@ -2,6 +2,9 @@
 backend/.env
 .env
 
+# MCP config contains access tokens — keep local only
+.mcp.json
+
 # Python
 __pycache__/
 *.py[cod]
