@@ -1,15 +1,17 @@
 import os
 import sys
+import re
 import random
 import json
 import time
 from pathlib import Path
 from datetime import datetime
+from typing import Optional
 
 from dotenv import load_dotenv
 load_dotenv(Path(__file__).parent.parent / ".env")
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from pydantic import BaseModel
 from fastapi.staticfiles import StaticFiles
 from fastapi.responses import FileResponse
@@ -18,7 +20,13 @@ sys.path.insert(0, str(Path(__file__).parent))
 from scrapers.sep import scrape_random_entry
 from scrapers.gutenberg import scrape_random_book
 from generator import generate_questions, ask_followup
-from database import init_db, save_passage, get_random_passage, get_passage_by_id, count_passages, flag_question
+from database import (
+    init_db, save_passage, get_random_passage, get_passage_by_id,
+    count_passages, flag_question,
+    create_user, get_user_by_username, get_user_by_id, update_user_settings,
+    save_user_progress, get_user_stats,
+)
+from auth import hash_password, verify_password, create_token, verify_token
 
 app = FastAPI()
 init_db()
@@ -34,6 +42,23 @@ app.mount("/static", StaticFiles(directory=str(frontend_path)), name="static")
 @app.get("/")
 def index():
     return FileResponse(str(frontend_path / "index.html"))
+
+
+@app.get("/account")
+def account():
+    return FileResponse(str(frontend_path / "account.html"))
+
+
+# ── Auth helper ─────────────────────────────────────────────
+def get_current_user(request: Request):
+    auth = request.headers.get("Authorization", "")
+    if not auth.startswith("Bearer "):
+        return None
+    token = auth[len("Bearer "):]
+    payload = verify_token(token)
+    if not payload:
+        return None
+    return get_user_by_id(payload["user_id"])
 
 
 @app.get("/api/passage")
@@ -115,6 +140,85 @@ def ask(payload: AskPayload):
         return {"answer": answer}
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Ask failed: {e}")
+
+
+# ── Auth routes ─────────────────────────────────────────────
+
+class AuthPayload(BaseModel):
+    username: str
+    password: str
+
+@app.post("/api/auth/register")
+def register(payload: AuthPayload):
+    if not re.match(r'^[a-zA-Z0-9]{3,20}$', payload.username):
+        raise HTTPException(status_code=400, detail="Username must be 3-20 alphanumeric characters.")
+    if len(payload.password) < 6:
+        raise HTTPException(status_code=400, detail="Password must be at least 6 characters.")
+    user = create_user(payload.username, hash_password(payload.password))
+    if not user:
+        raise HTTPException(status_code=400, detail="Username already taken.")
+    token = create_token(user["id"], user["username"])
+    return {"token": token, "username": user["username"], "user_id": user["id"]}
+
+
+@app.post("/api/auth/login")
+def login(payload: AuthPayload):
+    user = get_user_by_username(payload.username)
+    if not user or not verify_password(payload.password, user["password_hash"]):
+        raise HTTPException(status_code=401, detail="Invalid username or password.")
+    token = create_token(user["id"], user["username"])
+    return {"token": token, "username": user["username"], "user_id": user["id"]}
+
+
+@app.get("/api/auth/me")
+def me(request: Request):
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired token.")
+    return {"username": user["username"], "user_id": user["id"], "settings": user["settings"]}
+
+
+class SettingsPayload(BaseModel):
+    settings: dict
+
+@app.patch("/api/auth/settings")
+def update_settings(payload: SettingsPayload, request: Request):
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired token.")
+    update_user_settings(user["id"], payload.settings)
+    return {"status": "saved"}
+
+
+# ── Progress routes ──────────────────────────────────────────
+
+class ProgressPayload(BaseModel):
+    date: str
+    passages_completed: int
+    questions_correct: int
+    questions_total: int
+    topic: str = ""
+    question_type_stats: dict = {}
+
+@app.post("/api/user/progress")
+def post_progress(payload: ProgressPayload, request: Request):
+    user = get_current_user(request)
+    if not user:
+        return {"status": "skipped"}
+    save_user_progress(
+        user["id"], payload.date, payload.passages_completed,
+        payload.questions_correct, payload.questions_total,
+        payload.topic, payload.question_type_stats,
+    )
+    return {"status": "saved"}
+
+
+@app.get("/api/user/stats")
+def user_stats(request: Request):
+    user = get_current_user(request)
+    if not user:
+        raise HTTPException(status_code=401, detail="Invalid or expired token.")
+    return get_user_stats(user["id"])
 
 
 def _scrape_and_save(topic: str = None) -> dict:

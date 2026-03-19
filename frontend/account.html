@@ -1,0 +1,145 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Account — CARS Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/account.css" />
+</head>
+<body>
+
+  <!-- Top nav -->
+  <nav class="account-nav">
+    <a href="/" class="nav-back">← Back to Practice</a>
+    <div class="nav-logo">
+      <span>🩺</span>
+      <span>CARS Practice</span>
+    </div>
+    <div class="nav-spacer"></div>
+  </nav>
+
+  <!-- Auth state (shown when not logged in) -->
+  <div id="auth-state" class="page-center hidden">
+    <div class="auth-card">
+      <div class="auth-icon">🩺</div>
+      <h1 class="auth-title">CARS Practice</h1>
+      <p class="auth-sub">Track your progress and personalize your experience.</p>
+
+      <div class="auth-tabs">
+        <button class="auth-tab active" id="tab-login" onclick="switchTab('login')">Sign In</button>
+        <button class="auth-tab" id="tab-register" onclick="switchTab('register')">Create Account</button>
+      </div>
+
+      <!-- Login form -->
+      <form id="login-form" class="auth-form" onsubmit="submitLogin(event)">
+        <div class="form-group">
+          <label>Username</label>
+          <input type="text" id="login-username" autocomplete="username" placeholder="your username" required />
+        </div>
+        <div class="form-group">
+          <label>Password</label>
+          <input type="password" id="login-password" autocomplete="current-password" placeholder="••••••" required />
+        </div>
+        <p class="auth-error hidden" id="login-error"></p>
+        <button type="submit" class="btn-primary btn-full" id="login-submit">Sign In</button>
+      </form>
+
+      <!-- Register form -->
+      <form id="register-form" class="auth-form hidden" onsubmit="submitRegister(event)">
+        <div class="form-group">
+          <label>Username <span class="form-hint">(3-20 alphanumeric)</span></label>
+          <input type="text" id="reg-username" autocomplete="username" placeholder="choose a username" required />
+        </div>
+        <div class="form-group">
+          <label>Password <span class="form-hint">(min 6 characters)</span></label>
+          <input type="password" id="reg-password" autocomplete="new-password" placeholder="••••••" required />
+        </div>
+        <p class="auth-error hidden" id="register-error"></p>
+        <button type="submit" class="btn-primary btn-full" id="register-submit">Create Account</button>
+      </form>
+    </div>
+  </div>
+
+  <!-- Profile state (shown when logged in) -->
+  <div id="profile-state" class="profile-page hidden">
+
+    <div class="profile-header">
+      <div>
+        <h1 class="profile-welcome" id="profile-welcome">Welcome back!</h1>
+        <p class="profile-sub">Here's your CARS progress at a glance.</p>
+      </div>
+      <button class="btn-logout" onclick="logout()">Log out</button>
+    </div>
+
+    <!-- Stats grid -->
+    <div class="stats-grid">
+      <div class="stat-card">
+        <div class="stat-icon">📋</div>
+        <div class="stat-value" id="stat-passages">—</div>
+        <div class="stat-label">Total Passages</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🎯</div>
+        <div class="stat-value" id="stat-score">—</div>
+        <div class="stat-label">Avg Score</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🔥</div>
+        <div class="stat-value" id="stat-streak">—</div>
+        <div class="stat-label">Current Streak</div>
+      </div>
+      <div class="stat-card">
+        <div class="stat-icon">🧬</div>
+        <div class="stat-value" id="stat-topic">—</div>
+        <div class="stat-label">Best Topic</div>
+      </div>
+    </div>
+
+    <!-- Weakest type callout -->
+    <div class="weakspot-card" id="weakspot-card" style="display:none">
+      <div class="weakspot-left">
+        <span class="weakspot-icon">📊</span>
+        <div>
+          <div class="weakspot-title">Your weak spot: <span id="weakspot-type"></span></div>
+          <div class="weakspot-detail" id="weakspot-detail"></div>
+          <div class="weakspot-tip" id="weakspot-tip"></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Recent activity -->
+    <div class="section-card">
+      <h2 class="section-title">Recent Activity</h2>
+      <div id="recent-activity">
+        <p class="empty-state">No activity yet. Start practicing!</p>
+      </div>
+    </div>
+
+    <!-- Settings -->
+    <div class="section-card">
+      <h2 class="section-title">Settings</h2>
+      <div class="settings-form">
+        <div class="form-group">
+          <label>Preferred Topic</label>
+          <select id="pref-topic" class="settings-select">
+            <option value="">No preference (All)</option>
+            <option value="philosophy">Philosophy</option>
+            <option value="ethics">Ethics</option>
+            <option value="social science">Social Science</option>
+            <option value="natural science">Natural Science</option>
+            <option value="humanities">Humanities</option>
+          </select>
+        </div>
+        <button class="btn-primary" onclick="saveSettings()">Save Settings</button>
+        <span class="settings-status" id="settings-status"></span>
+      </div>
+    </div>
+
+  </div>
+
+  <script src="/static/account.js"></script>
+</body>
+</html>
