@@ -1,0 +1,182 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>CARS Practice</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,500;0,700;1,500&family=Inter:wght@400;500;600&family=Lora:ital@0;1&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/static/style.css" />
+</head>
+<body>
+
+  <div class="app-wrapper">
+
+    <!-- Sidebar -->
+    <aside class="sidebar">
+      <div class="logo">
+        <span class="logo-icon">🩺</span>
+        <span class="logo-text">CARS<br><small>MCAT Practice</small></span>
+      </div>
+
+      <div class="streak-card">
+        <div class="streak-top">
+          <span class="streak-fire">🔥</span>
+          <span class="streak-number" id="streak-number">0</span>
+        </div>
+        <div class="streak-label" id="streak-label">day streak</div>
+        <div class="streak-done hidden" id="streak-done">✓ Done for today</div>
+      </div>
+
+      <nav class="sidebar-nav">
+        <button class="nav-btn active" onclick="setNavActive(this); goHome()">
+          <span>🏠</span> Home
+        </button>
+        <button class="nav-btn" onclick="setNavActive(this); loadPassage(true)">
+          <span>🔬</span> New Passage
+        </button>
+      </nav>
+
+      <div class="topic-filters">
+        <div class="filter-label">Filter by topic</div>
+        <button class="filter-btn active" onclick="setTopic('all', this)">All</button>
+        <button class="filter-btn" onclick="setTopic('philosophy', this)">Philosophy</button>
+        <button class="filter-btn" onclick="setTopic('social science', this)">Social Science</button>
+        <button class="filter-btn" onclick="setTopic('natural science', this)">Natural Science</button>
+        <button class="filter-btn" onclick="setTopic('humanities', this)">Humanities</button>
+        <button class="filter-btn" onclick="setTopic('ethics', this)">Ethics</button>
+      </div>
+
+      <div class="sidebar-tip">
+        <p>⚕️ <strong>CARS tip:</strong><br><span id="cars-tip"></span></p>
+      </div>
+
+      <button class="feedback-btn" onclick="openFeedback()">
+        💬 Leave Feedback
+      </button>
+    </aside>
+
+    <!-- Main content -->
+    <div class="main-content">
+
+      <!-- Top bar -->
+      <div class="topbar">
+        <div class="topbar-left">
+          <span id="mode-badge" class="mode-badge">Live</span>
+          <span id="topic-label" class="topic-label"></span>
+        </div>
+        <div class="topbar-right">
+          <a id="source-link-top" href="#" target="_blank" class="source-link-top"></a>
+        </div>
+      </div>
+
+      <!-- Welcome -->
+      <div id="welcome" class="welcome-state">
+        <div class="welcome-card">
+          <div class="welcome-icon">🩺</div>
+          <h2>MCAT CARS Practice</h2>
+          <p>Real academic passages. MCAT-quality questions. Built for pre-med students who want deliberate, high-quality reading practice.</p>
+
+          <!-- EKG animation -->
+          <svg class="welcome-ekg" width="260" height="36" viewBox="0 0 260 36">
+            <polyline class="ekg-path" points="0,18 40,18 55,18 65,2 72,34 80,18 95,18 105,18 115,6 122,30 130,18 260,18"
+              fill="none" stroke="#1565C0" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+
+          <div class="welcome-features">
+            <div class="feature"><span>📋</span><span>Passages quality-filtered to match real MCAT CARS difficulty and style</span></div>
+            <div class="feature"><span>🧬</span><span>Sourced from Stanford Encyclopedia of Philosophy &amp; classic academic texts</span></div>
+            <div class="feature"><span>🔬</span><span>5 MCAT-style questions per passage with detailed explanations</span></div>
+            <div class="feature"><span>🎯</span><span>Filter by topic: philosophy, social science, ethics, natural science &amp; more</span></div>
+          </div>
+          <button onclick="loadPassage(true)" class="btn-primary btn-large">Start Practicing →</button>
+        </div>
+      </div>
+
+      <!-- Loading -->
+      <div id="loading" class="loading-state hidden">
+        <div class="loading-card">
+          <div class="spinner"></div>
+          <p id="loading-msg">Finding your passage...</p>
+          <span class="loading-sub">Scraping from academic sources</span>
+        </div>
+      </div>
+
+      <!-- Error -->
+      <div id="error" class="error-state hidden">
+        <div class="error-card">
+          <span class="error-icon">🩻</span>
+          <h3>Couldn't load a passage</h3>
+          <p id="error-msg"></p>
+          <div class="error-actions">
+            <button onclick="loadPassage(true)" class="btn-primary">Try Again</button>
+            <button onclick="goHome()" class="btn-secondary">Go Home</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div id="content" class="content-grid hidden">
+
+        <!-- Passage column -->
+        <div class="passage-col">
+          <div class="passage-card">
+            <div class="passage-card-header">
+              <span class="card-label">Passage</span>
+              <span id="source-badge" class="source-badge"></span>
+            </div>
+            <div id="passage-text" class="passage-text"></div>
+          </div>
+        </div>
+
+        <!-- Questions column -->
+        <div class="questions-col">
+          <div class="progress-card" id="progress-card">
+            <div class="progress-header">
+              <span id="progress-label">5 questions</span>
+              <span id="score-inline"></span>
+            </div>
+            <div class="progress-bar-track">
+              <div class="progress-bar-fill" id="progress-fill" style="width:0%"></div>
+            </div>
+          </div>
+
+          <div id="questions"></div>
+
+          <div id="results-card" class="results-card hidden">
+            <div id="confetti-container"></div>
+            <div class="results-emoji" id="results-emoji">🎉</div>
+            <div class="results-score" id="final-score"></div>
+            <div class="results-msg" id="results-msg"></div>
+            <div class="results-streak" id="results-streak"></div>
+            <div class="results-btns">
+              <button onclick="loadPassage(true)" class="btn-primary">New Passage 🔬</button>
+              <button onclick="goHome()" class="btn-secondary">Home</button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- Feedback modal -->
+  <div id="feedback-overlay" class="feedback-overlay hidden">
+    <div class="feedback-modal">
+      <div class="feedback-header">
+        <span>💬 Feedback</span>
+        <button onclick="closeFeedback()" class="close-btn">✕</button>
+      </div>
+      <p class="feedback-sub">What's working? What could be better? Bugs? Ideas?</p>
+      <textarea id="feedback-text" class="feedback-textarea" placeholder="Type your feedback here..."></textarea>
+      <div class="feedback-actions">
+        <span id="feedback-status" class="feedback-status"></span>
+        <button onclick="submitFeedback()" class="btn-primary" id="feedback-submit">Send</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="/static/app.js"></script>
+</body>
+</html>
