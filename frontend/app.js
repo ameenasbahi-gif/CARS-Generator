@@ -3,6 +3,10 @@ let answered = 0;
 let correct = 0;
 let total = 0;
 let currentTopic = 'all';
+let currentPassageData = null;
+let currentPassageText = '';
+let sessionAnswers = [];
+let loadingInterval = null;
 
 // ── CARS Tips ──────────────────────────────────────────────
 const TIPS = [
@@ -32,6 +36,23 @@ const TIPS = [
   "The passage is your only evidence. Your opinion doesn't count.",
   "Eliminate one wrong answer at a time — don't try to pick the right one first.",
 ];
+
+// ── Loading messages ───────────────────────────────────────
+const LOADING_MESSAGES = [
+  "Finding a passage…",
+  "Evaluating passage quality…",
+  "Generating questions with Claude…",
+  "Almost ready…",
+];
+
+// ── Question type tips ─────────────────────────────────────
+const TYPE_TIPS = {
+  'PRIMARY PURPOSE': "On 'primary purpose' questions, eliminate answers that are too broad or too narrow.",
+  "AUTHOR'S ATTITUDE": "The author's attitude shows in word choice, not just what they say directly.",
+  'INFERENCE': "On inference questions, pick the most conservative claim the passage supports.",
+  'SPECIFIC DETAIL': "Wrong answers often distort the passage — they're close but not quite right.",
+  'APPLICATION': "Analogy questions ask you to apply the author's logic to a new situation.",
+};
 
 // ── Streak ─────────────────────────────────────────────────
 function getToday() {
@@ -126,6 +147,18 @@ async function loadPassage(fresh = false) {
 
 // ── Render passage ─────────────────────────────────────────
 function renderPassage(data) {
+  stopLoadingCycle();
+  currentPassageData = data;
+  currentPassageText = data.passage || '';
+  sessionAnswers = [];
+
+  // Feature 8: Source link footer
+  const footerLink = document.getElementById('passage-source-link');
+  if (footerLink) {
+    footerLink.href = data.source_url || '#';
+    footerLink.textContent = data.source_title || data.source_name || '';
+  }
+
   // Topbar
   const modeBadge = document.getElementById('mode-badge');
   modeBadge.textContent = data.cached ? 'Cached' : 'Live';
@@ -178,7 +211,7 @@ function renderPassage(data) {
       <div class="q-number">Question ${i + 1} of ${total}</div>
       <div class="q-text">${escapeHtml(q.question)}</div>
       <div class="choices" id="choices-${i}">${choices}</div>
-      <div class="explanation hidden" id="exp-${i}">
+      <div class="explanation" id="exp-${i}">
         <span class="exp-label">Explanation</span>
         ${escapeHtml(q.explanation || '')}
       </div>
@@ -215,10 +248,28 @@ function answer(qIndex, selected, correctLetter) {
     if (b.dataset.letter === selected && selected !== correctLetter) b.classList.add('wrong');
   });
 
-  expEl.classList.remove('hidden');
+  // Feature 3: Show/hide explanation toggle button
+  const showBtn = document.createElement('button');
+  showBtn.className = 'show-explanation-btn';
+  showBtn.textContent = 'Show explanation';
+  showBtn.addEventListener('click', function () {
+    if (expEl.classList.contains('revealed')) {
+      expEl.classList.remove('revealed');
+      this.textContent = 'Show explanation';
+    } else {
+      expEl.classList.add('revealed');
+      this.textContent = 'Hide explanation';
+      // Feature 6: Add Ask Claude button once explanation is revealed
+      if (!card.querySelector('.ask-followup-btn')) {
+        addAskClaudeButton(card, qIndex, selected, correctLetter, expEl);
+      }
+    }
+  });
+  expEl.insertAdjacentElement('beforebegin', showBtn);
 
   answered++;
-  if (selected === correctLetter) {
+  const isCorrect = selected === correctLetter;
+  if (isCorrect) {
     correct++;
     const correctBtn = choicesEl.querySelector('.choice-btn.correct');
     if (correctBtn) {
@@ -227,8 +278,146 @@ function answer(qIndex, selected, correctLetter) {
     }
   }
 
+  // Feature 4: Save session state
+  sessionAnswers.push({ questionIndex: qIndex, chosen: selected, isCorrect });
+  saveSession();
+
   updateProgress();
   if (answered === total) showResults();
+}
+
+// ── Feature 6: Ask Claude follow-up ───────────────────────
+function addAskClaudeButton(card, qIndex, selected, correctLetter, expEl) {
+  const q = currentPassageData && currentPassageData.questions
+    ? currentPassageData.questions[qIndex] : null;
+
+  const askBtn = document.createElement('button');
+  askBtn.className = 'ask-followup-btn';
+  askBtn.textContent = 'Ask a follow-up';
+
+  const followupContainer = document.createElement('div');
+  followupContainer.className = 'followup-container';
+
+  askBtn.addEventListener('click', function () {
+    if (followupContainer.querySelector('.followup-form')) return;
+
+    const form = document.createElement('div');
+    form.className = 'followup-form';
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'followup-input';
+    input.placeholder = 'Ask Claude about this question…';
+
+    const submitBtn = document.createElement('button');
+    submitBtn.className = 'followup-submit-btn';
+    submitBtn.textContent = 'Ask';
+
+    const answerArea = document.createElement('div');
+    answerArea.className = 'followup-answer-area';
+
+    submitBtn.addEventListener('click', async () => {
+      const userQ = input.value.trim();
+      if (!userQ) return;
+
+      const choicesEl = document.getElementById(`choices-${qIndex}`);
+      const correctBtn = choicesEl ? choicesEl.querySelector(`.choice-btn[data-letter="${correctLetter}"]`) : null;
+      const correctText = correctBtn ? correctBtn.querySelector('span:last-child').textContent : correctLetter;
+      const selectedBtn = choicesEl ? choicesEl.querySelector(`.choice-btn[data-letter="${selected}"]`) : null;
+      const selectedText = selectedBtn ? selectedBtn.querySelector('span:last-child').textContent : selected;
+
+      answerArea.innerHTML = '<div class="claude-followup-answer">Claude is thinking…</div>';
+
+      try {
+        const res = await fetch('/api/ask', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            passage: currentPassageText,
+            question_text: q ? q.question : '',
+            user_answer: selectedText,
+            correct_answer: correctText,
+            explanation: q ? (q.explanation || '') : '',
+            user_question: userQ,
+          }),
+        });
+        if (!res.ok) throw new Error();
+        const responseData = await res.json();
+        const answer = responseData.answer || responseData.response || JSON.stringify(responseData);
+        answerArea.innerHTML = `<div class="claude-followup-answer">${escapeHtml(answer)}</div>`;
+      } catch {
+        answerArea.innerHTML = '<div class="claude-followup-answer">Couldn\'t reach Claude. Try again.</div>';
+      }
+    });
+
+    form.appendChild(input);
+    form.appendChild(submitBtn);
+    form.appendChild(answerArea);
+    followupContainer.appendChild(form);
+  });
+
+  expEl.insertAdjacentElement('afterend', askBtn);
+  askBtn.insertAdjacentElement('afterend', followupContainer);
+}
+
+// ── Feature 4: Session persistence ────────────────────────
+function saveSession() {
+  if (!currentPassageData) return;
+  const session = {
+    passageId: currentPassageData.id,
+    topic: currentPassageData.topic,
+    answered,
+    correct,
+    total,
+    answers: sessionAnswers,
+  };
+  localStorage.setItem('cars_session', JSON.stringify(session));
+}
+
+async function continueSession(passageId) {
+  document.getElementById('session-restore-banner')?.remove();
+  showLoading();
+  try {
+    const res = await fetch(`/api/passage?id=${passageId}`);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    renderPassage(data);
+  } catch {
+    stopLoadingCycle();
+    show('welcome');
+    hide('loading');
+  }
+}
+
+function startFreshSession() {
+  localStorage.removeItem('cars_session');
+  document.getElementById('session-restore-banner')?.remove();
+  show('welcome');
+}
+
+function checkSessionRestore() {
+  const raw = localStorage.getItem('cars_session');
+  if (!raw) { show('welcome'); return; }
+
+  let session;
+  try { session = JSON.parse(raw); } catch { show('welcome'); return; }
+
+  if (!session || !session.passageId || session.answered >= session.total) {
+    localStorage.removeItem('cars_session');
+    show('welcome');
+    return;
+  }
+
+  const banner = document.createElement('div');
+  banner.id = 'session-restore-banner';
+  banner.innerHTML =
+    'You have an unfinished session. ' +
+    `<button onclick="continueSession('${session.passageId}')">Continue</button> ` +
+    '<button onclick="startFreshSession()">Start fresh</button>';
+
+  const main = document.querySelector('main') || document.body;
+  main.insertBefore(banner, main.firstChild);
+  show('welcome');
 }
 
 // ── Progress bar ───────────────────────────────────────────
@@ -270,10 +459,35 @@ function showResults() {
 
   if (pct >= 60) spawnConfetti();
   document.getElementById('results-card').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+
+  // Feature 4: Clear session on completion
+  localStorage.removeItem('cars_session');
+
+  // Feature 5: Contextual CARS tip
+  let tipText = '';
+  const wrongAnswers = sessionAnswers.filter(a => !a.isCorrect);
+  if (wrongAnswers.length === 0) {
+    tipText = TIPS[Math.floor(Math.random() * TIPS.length)];
+  } else {
+    const firstWrongQ = currentPassageData && currentPassageData.questions
+      ? currentPassageData.questions[wrongAnswers[0].questionIndex] : null;
+    const qType = firstWrongQ
+      ? (firstWrongQ.type || firstWrongQ.question_type || '').toUpperCase().trim() : '';
+    tipText = TYPE_TIPS[qType] || TIPS[Math.floor(Math.random() * TIPS.length)];
+  }
+
+  let resultTipEl = document.getElementById('result-tip');
+  if (!resultTipEl) {
+    resultTipEl = document.createElement('div');
+    resultTipEl.id = 'result-tip';
+    document.getElementById('results-card').appendChild(resultTipEl);
+  }
+  resultTipEl.textContent = tipText;
 }
 
 // ── Error / loading states ─────────────────────────────────
 function showApiError() {
+  stopLoadingCycle();
   document.getElementById('error-msg').innerHTML =
     'Your Anthropic API account has no credits. ' +
     '<a href="https://console.anthropic.com" target="_blank" style="color:inherit;font-weight:600;text-decoration:underline;">Add credits at console.anthropic.com</a> ' +
@@ -285,6 +499,7 @@ function showApiError() {
 }
 
 function showError(msg) {
+  stopLoadingCycle();
   document.getElementById('error-msg').textContent = msg;
   show('error');
   hide('loading');
@@ -292,8 +507,27 @@ function showError(msg) {
   hide('welcome');
 }
 
+function stopLoadingCycle() {
+  if (loadingInterval) {
+    clearInterval(loadingInterval);
+    loadingInterval = null;
+  }
+}
+
 function showLoading(msg = 'Finding your passage...') {
-  document.getElementById('loading-msg').textContent = msg;
+  stopLoadingCycle();
+  let msgEl = document.getElementById('loading-msg');
+  if (!msgEl) {
+    msgEl = document.createElement('p');
+    msgEl.id = 'loading-msg';
+    document.getElementById('loading').appendChild(msgEl);
+  }
+  let idx = 0;
+  msgEl.textContent = LOADING_MESSAGES[0];
+  loadingInterval = setInterval(() => {
+    idx = (idx + 1) % LOADING_MESSAGES.length;
+    msgEl.textContent = LOADING_MESSAGES[idx];
+  }, 3000);
   show('loading');
   hide('welcome');
   hide('content');
@@ -327,6 +561,43 @@ document.addEventListener('DOMContentLoaded', () => {
   document.getElementById('feedback-overlay').addEventListener('click', function(e) {
     if (e.target === this) closeFeedback();
   });
+
+  // Feature 2: Keyboard answer selection (A/B/C/D or 1/2/3/4)
+  document.addEventListener('keydown', (e) => {
+    const tag = document.activeElement ? document.activeElement.tagName.toUpperCase() : '';
+    if (tag === 'INPUT' || tag === 'TEXTAREA') return;
+
+    const keyMap = { 'A': 0, 'B': 1, 'C': 2, 'D': 3, '1': 0, '2': 1, '3': 2, '4': 3 };
+    const idx = keyMap[e.key.toUpperCase()];
+    if (idx === undefined) return;
+
+    const unanswered = document.querySelectorAll('.question-card:not(.answered)');
+    if (!unanswered.length) return;
+
+    const btns = unanswered[0].querySelectorAll('.choice-btn:not([disabled])');
+    if (btns[idx]) btns[idx].click();
+  });
+
+  // Feature 7: Mobile "Back to passage" button
+  const backBtn = document.getElementById('back-to-passage-btn');
+  if (backBtn) {
+    backBtn.addEventListener('click', () => {
+      const passageEl = document.getElementById('passage-text');
+      if (passageEl) passageEl.scrollIntoView({ behavior: 'smooth' });
+    });
+
+    window.addEventListener('scroll', () => {
+      const passageEl = document.getElementById('passage-text');
+      if (!passageEl) return;
+      const container = passageEl.closest('.card') || passageEl.closest('section') || passageEl;
+      const rect = container.getBoundingClientRect();
+      if (rect.bottom < 0) {
+        backBtn.classList.add('visible');
+      } else {
+        backBtn.classList.remove('visible');
+      }
+    });
+  }
 });
 
 async function submitFeedback() {
@@ -438,4 +709,5 @@ document.getElementById('cars-tip').textContent = TIPS[Math.floor(Math.random() 
 const initStreak = loadStreak();
 renderStreak(initStreak);
 updateMobileStreak(initStreak);
-show('welcome');
+// Feature 4: Check for unfinished session before showing welcome
+checkSessionRestore();

@@ -19,6 +19,31 @@ def init_db():
             created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     """)
+    # Add flagged_questions column to existing DBs if missing
+    try:
+        conn.execute("ALTER TABLE passages ADD COLUMN flagged_questions TEXT DEFAULT '[]'")
+        conn.commit()
+    except Exception:
+        pass  # Column already exists
+    conn.commit()
+    conn.close()
+
+
+def flag_question(passage_id: int, question_index: int):
+    conn = sqlite3.connect(DB_PATH)
+    row = conn.execute(
+        "SELECT flagged_questions FROM passages WHERE id = ?", (passage_id,)
+    ).fetchone()
+    if not row:
+        conn.close()
+        return
+    flagged = json.loads(row[0] or "[]")
+    if question_index not in flagged:
+        flagged.append(question_index)
+    conn.execute(
+        "UPDATE passages SET flagged_questions = ? WHERE id = ?",
+        (json.dumps(flagged), passage_id)
+    )
     conn.commit()
     conn.close()
 
@@ -54,6 +79,26 @@ def get_random_passage(topic: str = None):
         row = conn.execute(
             "SELECT id, source_name, source_url, source_title, topic, passage, questions FROM passages ORDER BY RANDOM() LIMIT 1"
         ).fetchone()
+    conn.close()
+    if not row:
+        return None
+    return {
+        "id": row[0],
+        "source_name": row[1],
+        "source_url": row[2],
+        "source_title": row[3],
+        "topic": row[4],
+        "passage": row[5],
+        "questions": json.loads(row[6]),
+    }
+
+
+def get_passage_by_id(passage_id: int):
+    conn = sqlite3.connect(DB_PATH)
+    row = conn.execute(
+        "SELECT id, source_name, source_url, source_title, topic, passage, questions FROM passages WHERE id = ?",
+        (passage_id,)
+    ).fetchone()
     conn.close()
     if not row:
         return None

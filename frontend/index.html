@@ -123,6 +123,14 @@
           <p id="loading-msg">Finding your passage...</p>
           <span class="loading-sub">Scraping from academic sources</span>
         </div>
+        <div id="skeleton-screen" class="skeleton-screen hidden">
+          <div class="skeleton skeleton-passage"></div>
+          <div class="skeleton skeleton-question"></div>
+          <div class="skeleton skeleton-question"></div>
+          <div class="skeleton skeleton-question"></div>
+          <div class="skeleton skeleton-question"></div>
+          <div class="skeleton skeleton-question"></div>
+        </div>
       </div>
 
       <!-- Error -->
@@ -149,8 +157,14 @@
               <span id="source-badge" class="source-badge"></span>
             </div>
             <div id="passage-text" class="passage-text"></div>
+            <div id="passage-source-footer" class="passage-source-footer">
+              <span>Source: </span><a id="passage-source-link" href="#" target="_blank" rel="noopener"></a>
+            </div>
           </div>
         </div>
+
+        <!-- Back to passage button (mobile) -->
+        <button id="back-to-passage-btn" class="back-to-passage">↑ Back to passage</button>
 
         <!-- Questions column -->
         <div class="questions-col">

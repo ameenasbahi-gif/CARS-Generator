@@ -112,3 +112,22 @@ def generate_questions(passage_data: dict):
 
     data = json.loads(raw)
     return data["questions"]
+
+
+def ask_followup(passage, question_text, user_answer, correct_answer, explanation, user_question):
+    """Call Claude for a short follow-up explanation on a specific question."""
+    user_msg = (
+        f"PASSAGE EXCERPT:\n{passage[:400]}\n\n"
+        f"QUESTION: {question_text}\n"
+        f"STUDENT CHOSE: {user_answer}\n"
+        f"CORRECT ANSWER: {correct_answer}\n"
+        f"EXPLANATION: {explanation}\n\n"
+        f"STUDENT'S FOLLOW-UP QUESTION: {user_question}"
+    )
+    message = client.messages.create(
+        model="claude-opus-4-6",
+        max_tokens=512,
+        system="You are an MCAT CARS tutor. Answer the student's follow-up question about this passage and question in 2-3 sentences. Be direct and educational.",
+        messages=[{"role": "user", "content": user_msg}],
+    )
+    return message.content[0].text.strip()
