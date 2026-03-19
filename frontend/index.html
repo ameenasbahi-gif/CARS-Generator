@@ -60,6 +60,28 @@
     <!-- Main content -->
     <div class="main-content">
 
+      <!-- Mobile header -->
+      <div class="mobile-header">
+        <div class="mobile-logo">
+          <span>🩺</span>
+          <span class="mobile-logo-text">CARS</span>
+        </div>
+        <div class="mobile-streak">
+          <span>🔥</span>
+          <span id="mobile-streak-number">0</span>
+        </div>
+      </div>
+
+      <!-- Mobile topic filter strip -->
+      <div class="mobile-filters">
+        <button class="filter-btn active" onclick="setTopic('all', this); syncFilters(this, 0)">All</button>
+        <button class="filter-btn" onclick="setTopic('philosophy', this); syncFilters(this, 1)">Philosophy</button>
+        <button class="filter-btn" onclick="setTopic('social science', this); syncFilters(this, 2)">Social Science</button>
+        <button class="filter-btn" onclick="setTopic('natural science', this); syncFilters(this, 3)">Natural Science</button>
+        <button class="filter-btn" onclick="setTopic('humanities', this); syncFilters(this, 4)">Humanities</button>
+        <button class="filter-btn" onclick="setTopic('ethics', this); syncFilters(this, 5)">Ethics</button>
+      </div>
+
       <!-- Top bar -->
       <div class="topbar">
         <div class="topbar-left">
@@ -160,6 +182,19 @@
       </div>
     </div>
   </div>
+
+  <!-- Mobile bottom nav -->
+  <nav class="mobile-bottom-nav">
+    <button class="mobile-nav-btn active" id="mnav-home" onclick="mobileNav('home', this)">
+      <span>🏠</span><span>Home</span>
+    </button>
+    <button class="mobile-nav-btn" id="mnav-new" onclick="mobileNav('new', this)">
+      <span>🔬</span><span>New Passage</span>
+    </button>
+    <button class="mobile-nav-btn" id="mnav-feedback" onclick="openFeedback()">
+      <span>💬</span><span>Feedback</span>
+    </button>
+  </nav>
 
   <!-- Feedback modal -->
   <div id="feedback-overlay" class="feedback-overlay hidden">

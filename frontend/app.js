@@ -71,6 +71,8 @@ function markStreakComplete() {
 function renderStreak(data) {
   const today = getToday();
   document.getElementById('streak-number').textContent = data.count;
+  const mobileEl = document.getElementById('mobile-streak-number');
+  if (mobileEl) mobileEl.textContent = data.count;
   const doneEl = document.getElementById('streak-done');
   if (data.lastDate === today) {
     doneEl.classList.remove('hidden');
@@ -406,10 +408,36 @@ function spawnSparkles(x, y) {
   });
 }
 
+// ── Mobile nav ─────────────────────────────────────────────
+function mobileNav(action, btn) {
+  document.querySelectorAll('.mobile-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  if (action === 'home') goHome();
+  if (action === 'new') loadPassage(true);
+}
+
+// Sync sidebar filter buttons with mobile filter strip
+function syncFilters(clickedBtn, index) {
+  // Sync sidebar filter buttons
+  const sidebarBtns = document.querySelectorAll('.sidebar .filter-btn');
+  sidebarBtns.forEach(b => b.classList.remove('active'));
+  if (sidebarBtns[index]) sidebarBtns[index].classList.add('active');
+  // Sync mobile filter strip (deactivate all others)
+  document.querySelectorAll('.mobile-filters .filter-btn').forEach(b => b.classList.remove('active'));
+  clickedBtn.classList.add('active');
+}
+
+function updateMobileStreak(data) {
+  const el = document.getElementById('mobile-streak-number');
+  if (el) el.textContent = data.count;
+}
+
 // ── Init ───────────────────────────────────────────────────
 spawnParticles();
 // Rotating tip
 document.getElementById('cars-tip').textContent = TIPS[Math.floor(Math.random() * TIPS.length)];
 // Load and render streak
-renderStreak(loadStreak());
+const initStreak = loadStreak();
+renderStreak(initStreak);
+updateMobileStreak(initStreak);
 show('welcome');
