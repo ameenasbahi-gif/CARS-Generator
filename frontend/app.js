@@ -141,7 +141,7 @@ function renderPassage(data) {
   document.getElementById('source-badge').textContent = data.source_name || '';
   document.getElementById('passage-text').innerHTML = (data.passage || '')
     .split(/\n\n+/)
-    .map(p => `<p>${p.trim()}</p>`)
+    .map(p => `<p>${escapeHtml(p.trim())}</p>`)
     .join('');
 
   // Reset question state
@@ -255,10 +255,9 @@ function showResults() {
   renderStreak(streakData);
 
   const streakEl = document.getElementById('results-streak');
-  const isNewDay = streakData.count > 0;
   if (streakData.count >= 2) {
     streakEl.textContent = `🔥 ${streakData.count} day streak — keep it going!`;
-  } else if (isNewDay) {
+  } else if (streakData.count === 1) {
     streakEl.textContent = `🔥 Day 1 — the streak starts now.`;
   } else {
     streakEl.textContent = '';
@@ -286,7 +285,7 @@ function showApiError() {
 }
 
 function showError(msg) {
-  document.getElementById('error-msg').innerHTML = msg;
+  document.getElementById('error-msg').textContent = msg;
   show('error');
   hide('loading');
   hide('content');
@@ -345,12 +344,12 @@ async function submitFeedback() {
       body: JSON.stringify({ message: text }),
     });
     if (!res.ok) throw new Error();
-    status.style.color = 'var(--forest-glow)';
+    status.style.color = 'var(--teal-lt)';
     status.textContent = '✓ Thanks! Feedback saved.';
     document.getElementById('feedback-text').value = '';
     setTimeout(closeFeedback, 1800);
   } catch {
-    status.style.color = 'var(--rose)';
+    status.style.color = 'var(--red-lt)';
     status.textContent = 'Something went wrong. Try again.';
   } finally {
     btn.disabled = false;
@@ -416,15 +415,14 @@ function mobileNav(action, btn) {
   if (action === 'new') loadPassage(true);
 }
 
-// Sync sidebar filter buttons with mobile filter strip
+// Sync sidebar and mobile filter strips — keeps both in sync regardless of which was clicked
 function syncFilters(clickedBtn, index) {
-  // Sync sidebar filter buttons
-  const sidebarBtns = document.querySelectorAll('.sidebar .filter-btn');
-  sidebarBtns.forEach(b => b.classList.remove('active'));
-  if (sidebarBtns[index]) sidebarBtns[index].classList.add('active');
-  // Sync mobile filter strip (deactivate all others)
-  document.querySelectorAll('.mobile-filters .filter-btn').forEach(b => b.classList.remove('active'));
-  clickedBtn.classList.add('active');
+  document.querySelectorAll('.sidebar .filter-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === index);
+  });
+  document.querySelectorAll('.mobile-filters .filter-btn').forEach((b, i) => {
+    b.classList.toggle('active', i === index);
+  });
 }
 
 function updateMobileStreak(data) {

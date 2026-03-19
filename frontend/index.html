@@ -40,12 +40,12 @@
 
       <div class="topic-filters">
         <div class="filter-label">Filter by topic</div>
-        <button class="filter-btn active" onclick="setTopic('all', this)">All</button>
-        <button class="filter-btn" onclick="setTopic('philosophy', this)">Philosophy</button>
-        <button class="filter-btn" onclick="setTopic('social science', this)">Social Science</button>
-        <button class="filter-btn" onclick="setTopic('natural science', this)">Natural Science</button>
-        <button class="filter-btn" onclick="setTopic('humanities', this)">Humanities</button>
-        <button class="filter-btn" onclick="setTopic('ethics', this)">Ethics</button>
+        <button class="filter-btn active" onclick="setTopic('all', this); syncFilters(this, 0)">All</button>
+        <button class="filter-btn" onclick="setTopic('philosophy', this); syncFilters(this, 1)">Philosophy</button>
+        <button class="filter-btn" onclick="setTopic('social science', this); syncFilters(this, 2)">Social Science</button>
+        <button class="filter-btn" onclick="setTopic('natural science', this); syncFilters(this, 3)">Natural Science</button>
+        <button class="filter-btn" onclick="setTopic('humanities', this); syncFilters(this, 4)">Humanities</button>
+        <button class="filter-btn" onclick="setTopic('ethics', this); syncFilters(this, 5)">Ethics</button>
       </div>
 
       <div class="sidebar-tip">
